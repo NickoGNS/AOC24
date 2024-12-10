@@ -14,20 +14,26 @@ func main() {
 		return
 	}
 
+	fileStr := string(file)
 	mulSum := 0
+	isEnabled := true
 
-	reg := regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
-	matches := reg.FindAllStringSubmatch(string(file), -1)
+	combined := regexp.MustCompile(`don't\(\)|do\(\)|mul\((\d{1,3}),(\d{1,3})\)`)
 
-	for _, match := range matches {
-		if len(match) == 3 {
-			num1, _ := strconv.Atoi(match[1])
-			num2, _ := strconv.Atoi(match[2])
+	for _, match := range combined.FindAllStringSubmatchIndex(fileStr, -1) {
+		text := fileStr[match[0]:match[1]]
 
-			mulSum += (num1 * num2)
+		switch {
+		case text == "don't()":
+			isEnabled = false
+		case text == "do()":
+			isEnabled = true
+		case isEnabled && text[:4] == "mul(":
+			num1, _ := strconv.Atoi(fileStr[match[2]:match[3]])
+			num2, _ := strconv.Atoi(fileStr[match[4]:match[5]])
+			mulSum += num1 * num2
 		}
 	}
 
 	fmt.Println(mulSum)
-	// fmt.Println(mulSum)
 }
